@@ -1,0 +1,29 @@
+{
+  "author": "Alexander Matsievsky <alexander.matsievsky@gmx.com>",
+  "bugs": {
+    "url": "https://github.com/alexander-matsievsky/swagger-js-loader/issues"
+  },
+  "description": "",
+  "homepage": "https://github.com/alexander-matsievsky/swagger-js-loader#readme",
+  "keywords": [],
+  "license": "Apache-2.0",
+  "main": "index.js",
+  "name": "swagger-js-loader",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexander-matsievsky/swagger-js-loader.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "0.0.0",
+  "devDependencies": {
+    "flow-bin": "^0.59.0",
+    "generate-schema": "^2.5.1",
+    "standard": "^10.0.3",
+    "webpack": "^3.8.1"
+  },
+  "dependencies": {
+    "swagger-client": "^3.3.3"
+  }
+}
