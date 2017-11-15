@@ -20,6 +20,7 @@ function type (value) {
     case 'array':
       return type(value.items) + '[]'
     case 'object':
+    default:
       const required = new Set(value.required)
       return '{' + Object.entries(value.properties || {})
         .map(([k, v]) => `${k}${required.has(k) ? '' : '?'}:${type(v)}`)
@@ -32,7 +33,7 @@ function parameter (value) {
     return `P${value.$ref.split('/').slice(-1)[0]}`
   else
     return `{${value.name}${value.required ? '' : '?'}:${
-      value.schema ? type(value.schema) : value.type}}`
+      value.schema ? type(value.schema) : type(value)}}`
 }
 
 function response ([status, value]) {
@@ -45,13 +46,13 @@ function response ([status, value]) {
 }
 
 function definitions (swagger) {
-  return Object.entries(swagger.definitions)
+  return Object.entries(swagger.definitions || {})
     .sort(([$1], [$2]) => $1.localeCompare($2))
     .map(([k, v]) => `\nexport type ${k}=${type(v)}`).join('')
 }
 
 function parameters (swagger) {
-  return Object.entries(swagger.parameters)
+  return Object.entries(swagger.parameters || {})
     .sort(([$1], [$2]) => $1.localeCompare($2))
     .map(([k, v]) =>
       `\nexport type P${k}={\n${v.name}${v.required ? '' : '?'}:${
@@ -60,12 +61,19 @@ function parameters (swagger) {
 }
 
 function paths (swagger) {
-  const operations = Object.values(swagger.paths)
-    .reduce((operations, path) => operations.concat(Object.values(path)), [])
-    .reduce((operations, operation) => {
-      for (const tag of (operation.tags || ['default'])) {
+  const operations = Object.entries(swagger.paths)
+    .reduce((operations, [path, methods]) =>
+      operations.concat(Object.entries(methods).map(([method, operation]) =>
+        ({method, operation, path}))), [])
+    .reduce((operations, {method, operation, path}) => {
+      for (let tag of (operation.tags || ['default'])) {
+        tag = tag.replace(/\W/g, '_')
         operations[tag] = operations[tag] || {}
-        operations[tag][operation.operationId] = operation
+        const operationId = operation.operationId ||
+          method + path.split(/[\W_]/).filter(Boolean)
+            .map(segment => segment[0].toUpperCase() + segment.slice(1))
+            .join('')
+        operations[tag][operationId] = operation
       }
       return operations
     }, {})
